@@ -17,13 +17,17 @@ public class AutomatonOperations {
             int fromState = i;
             int toState = originalAutomaton.getTransitions().getOrDefault(i, new HashSet<>()).iterator().next();
             squaredAutomaton.addTransition(fromState, toState); // Copy original transitions
-            squaredAutomaton.addTransition(fromState + originalTotalStates, toState + originalTotalStates); // Adjusted copy for the square
+            squaredAutomaton.addTransition(fromState + originalTotalStates, toState + originalTotalStates); // Adjusted
+                                                                                                            // copy for
+                                                                                                            // the
+                                                                                                            // square
         }
 
         // In the square operation, after copying transitions
         for (int endState : originalAutomaton.getEndStates()) {
             // Assuming the start state of the duplicate is 'originalTotalStates'
-            squaredAutomaton.addEpsilonTransition(endState, originalTotalStates); // Directly to the start of the duplicate
+            squaredAutomaton.addEpsilonTransition(endState, originalTotalStates); // Directly to the start of the
+                                                                                  // duplicate
             squaredAutomaton.addEndState(endState + originalTotalStates);
         }
 
@@ -74,34 +78,35 @@ public class AutomatonOperations {
     // This might require careful handling to not violate the unary property
     // }
 
-    public static Automaton concatenate(Automaton first, Automaton second) {
-        // Calculate the total number of states and create a new concatenated automaton
-        int totalStates = first.getTotalStates() + second.getTotalStates();
-        Automaton concatenated = new Automaton(totalStates,
-                first.getCurrentAutomata() + "+" + second.getCurrentAutomata());
+    public static Automaton concatenate(Automaton firstAutomaton, Automaton secondAutomaton) {
+        int totalStates = firstAutomaton.getTotalStates() + secondAutomaton.getTotalStates();
+        Automaton concatenatedAutomaton = new Automaton(totalStates,
+                firstAutomaton.getCurrentAutomata() + "+" + secondAutomaton.getCurrentAutomata());
 
-        // Copy all transitions from the first automaton
-        first.getTransitions().forEach((state, transitions) -> transitions
-                .forEach(transition -> concatenated.addTransition(state, transition)));
+        // Copy transitions from the first automaton
+        for (int i = 0; i < firstAutomaton.getTotalStates(); i++) {
+            final int currentState = i; // Final variable for lambda expression
+            firstAutomaton.getTransitions().getOrDefault(i, new HashSet<>())
+                    .forEach(toState -> concatenatedAutomaton.addTransition(currentState, toState));
+        }
 
-        // Adjust and copy all transitions from the second automaton, offset by the size
-        // of the first
-        second.getTransitions().forEach((state, transitions) -> transitions.forEach(transition -> concatenated
-                .addTransition(state + first.getTotalStates(), transition + first.getTotalStates())));
+        // Copy transitions from the second automaton, adjusting their states
+        for (int i = 0; i < secondAutomaton.getTotalStates(); i++) {
+            final int offsetState = i + firstAutomaton.getTotalStates(); // Adjusted state index
+            secondAutomaton.getTransitions().getOrDefault(i, new HashSet<>()).forEach(toState -> concatenatedAutomaton
+                    .addTransition(offsetState, toState + firstAutomaton.getTotalStates()));
+        }
 
-        // For each end state of the first automaton, add a transition to the start
-        // state of the second automaton
-        first.getEndStates().forEach(endState -> {
-            // Ensure not to introduce multiple transitions for unary NFAs
-            if (second.getTotalStates() > 0) { // Check if the second automaton is not empty
-                concatenated.addTransition(endState, first.getTotalStates()); // Transition to the start of the second automaton
-            }
-        });
+        // Connect the end states of the first automaton to the start state of the
+        // second automaton
+        firstAutomaton.getEndStates().forEach(
+                endState -> concatenatedAutomaton.addEpsilonTransition(endState, firstAutomaton.getTotalStates()));
 
-        // Set the end states of the concatenated automaton based on the second
-        // automaton's end states
-        second.getEndStates().forEach(endState -> concatenated.addEndState(endState + first.getTotalStates()));
+        // Set the end states of the concatenated automaton to those of the second
+        // automaton, adjusted
+        secondAutomaton.getEndStates()
+                .forEach(endState -> concatenatedAutomaton.addEndState(endState + firstAutomaton.getTotalStates()));
 
-        return concatenated;
+        return concatenatedAutomaton;
     }
 }

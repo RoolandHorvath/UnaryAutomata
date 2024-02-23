@@ -20,7 +20,8 @@ class Automaton {
 
     public void addTransition(int fromState, int toState) {
         transitions.computeIfAbsent(fromState, k -> new HashSet<>()).add(toState);
-        // System.out.println("Adding transition: " + fromState + " -> " + toState); // Debug print
+        // System.out.println("Adding transition: " + fromState + " -> " + toState); //
+        // Debug print
     }
 
     public void addEndState(int state) {
@@ -64,26 +65,27 @@ class Automaton {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Loaded automaton: ").append(currentAutomata).append("\n");
-    
+
         // Regular transitions
         sb.append("Transitions:\n");
         for (Map.Entry<Integer, Set<Integer>> entry : transitions.entrySet()) {
-            entry.getValue().forEach(toState -> sb.append("State ").append(entry.getKey()).append(" -> ").append(toState).append("\n"));
+            entry.getValue().forEach(
+                    toState -> sb.append("State ").append(entry.getKey()).append(" -> ").append(toState).append("\n"));
         }
-    
+
         // Epsilon transitions
         if (!epsilonTransitions.isEmpty()) {
             sb.append("Epsilon Transitions:\n");
             for (Map.Entry<Integer, Set<Integer>> entry : epsilonTransitions.entrySet()) {
-                entry.getValue().forEach(toState -> sb.append("State ").append(entry.getKey()).append(" -> \u03B5 -> ").append(toState).append("\n"));
+                entry.getValue().forEach(toState -> sb.append("State ").append(entry.getKey()).append(" -> \u03B5 -> ")
+                        .append(toState).append("\n"));
             }
         }
-    
+
         // End states
         sb.append("End states: ").append(endStates).append("\n");
         return sb.toString();
     }
-    
 
     public String getCurrentAutomata() {
         return currentAutomata;

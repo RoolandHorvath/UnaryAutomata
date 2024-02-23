@@ -4,7 +4,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        String filename = "C:\\Users\\42190\\Desktop\\upjs\\UnaryAutomataList\\unarydfa5.txt";
+        String filename = "UnaryAutomataList\\unarydfa9.txt";
 
         AutomatonLoader loader = new AutomatonLoader();
         try {
@@ -28,7 +28,8 @@ public class Main {
                 System.out.println(starred);
             }
 
-            // Example: Applying the square operation to the first automaton (ensure list has at least one automaton)
+            // Example: Applying the square operation to the first automaton (ensure list
+            // has at least one automaton)
             if (!automata.isEmpty()) {
                 Automaton squared = AutomatonOperations.square(automata.get(0));
                 System.out.println("Result of square operation:");

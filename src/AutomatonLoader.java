@@ -26,7 +26,6 @@ class AutomatonLoader {
 
         for (int i = 0; i < totalStates; i++) {
             int fromState = i;
-            // Adjust the character decoding here
             int toState = charToStateNumber(definition.charAt(i));
             automaton.addTransition(fromState, toState);
 
@@ -51,7 +50,6 @@ class AutomatonLoader {
             case '=' -> 13;
             case '>' -> 14;
             case '?' -> 15;
-            // Add more cases as needed
             default -> throw new IllegalArgumentException("Unexpected character: " + c);
         };
     }
