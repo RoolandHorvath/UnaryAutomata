@@ -32,7 +32,7 @@ public class AutomatonOperations {
 
         // In the square operation, after copying transitions
         for (int endState : originalAutomaton.getEndStates()) {
-            // Assuming the start state of the duplicate is 'originalTotalStates'
+
             squaredAutomaton.addEpsilonTransition(endState, originalTotalStates); // Directly to the start of the
                                                                                   // duplicate
             squaredAutomaton.addEndState(endState + originalTotalStates);
