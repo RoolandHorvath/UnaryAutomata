@@ -5,124 +5,82 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
-    static boolean specialCaseFound = false;
-    static int counter = 0;
+
     public static void main(String[] args) {
-        String filename = "UnaryAutomata\\UnaryAutomataList\\unarydfa14.txt";
-        AutomatonLoader loader = new AutomatonLoader();
-        Scanner scanner = new Scanner(System.in);
+        String filename = "UnaryAutomata\\UnaryAutomataList\\unarydfa10.txt"; // File path to load automata from
+        AutomatonLoader loader = new AutomatonLoader(); // Instance of AutomatonLoader to load automata
+        Scanner scanner = new Scanner(System.in); // Scanner to read user input from console
 
         try {
+            // Load automata from file
             List<Automaton> automata = loader.loadAutomataFromFile(filename);
             System.out.println("Loaded " + automata.size() + " automata.");
-            System.out.println("Choose an operation: \n1. Square\n2. Concatenation\n3. Star\n4. Extended Concatenation with Automatic Batch Processing");
+            // Present options for operations to perform on automata
+            System.out.println("Choose an operation: \n1. Square\n2. Concatenation\n3. Star");
             int choice = scanner.nextInt();
 
-            Map<String, Integer> xyCombinations = new HashMap<>();
-            int processedCount = 0;
-            final int BATCH_SIZE = 1000;
+            Map<String, Integer> xyCombinations = new HashMap<>(); // Map to store combinations of states and their occurrences
+            int processedCount = 0; // Count of processed automata
+
             for (int i = 0; i < automata.size(); i++) {
                 Automaton automaton = automata.get(i);
+                // Skip automata that do not have half end states
                 if (!automaton.hasHalfEndStates()) continue;
 
                 processedCount++;
-                Automaton operationResult = null;
+                Automaton operationResult = null; // Store result of operations here
 
                 switch (choice) {
-                    case 1:
+                    case 1: // Square operation
                         operationResult = AutomatonOperations.square(automaton);
                         break;
-                    case 2:
+                    case 2: // Concatenation operation
                         if (i + 1 < automata.size() && automata.get(i + 1).hasHalfEndStates()) {
                             operationResult = AutomatonOperations.concatenate(automaton, automata.get(i + 1));
                             i++; // Skip next automaton since it's used for concatenation
                         }
                         break;
-                    case 3:
+                    case 3: // Star operation
                         operationResult = AutomatonOperations.star(automaton);
-                        break;
-                    case 4:
-                        // Process concatenation with every other automaton
-                        for (int j = 0; j < automata.size(); j++) {
-                            if (i != j && automata.get(j).hasHalfEndStates()) {
-                                Automaton concatenatedResult = AutomatonOperations.concatenate(automaton, automata.get(j));
-                                Automaton dfaResult = AutomatonOperations.convertToDFA(concatenatedResult);
-                                Automaton minimizedResult = AutomatonOperations.minimizeDFA(dfaResult);
-                                checkAndPrintResults(automaton, automata.get(j), minimizedResult, xyCombinations);
-                                
-                                if ((j + 1) % BATCH_SIZE == 0) {
-                                    batchProcessedMessage();
-                                }
-                            }
-                        }
                         break;
                 }
 
+                // If operation resulted in a non-null automaton, process it
                 if (operationResult != null) {
                     Automaton dfaResult = AutomatonOperations.convertToDFA(operationResult);
                     Automaton minimizedResult = AutomatonOperations.minimizeDFA(dfaResult);
                     System.out.println(minimizedResult);
 
+                    // Update the XY combinations map with the results of the operation
                     updateXYCombinations(minimizedResult, xyCombinations);
                 }
             }
-            if (!specialCaseFound && choice == 4) { 
-                System.out.println("No special case of concatenation was found.");
-            }
+            
             System.out.println("Processed " + processedCount + " automata with exactly half end states.");
+            // Print the combinations of total states and end states found across all processed automata
             printXYCombinations(xyCombinations);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error reading the file.");
         } finally {
-            scanner.close();
+            scanner.close(); // Close the scanner to prevent resource leak
         }
     }
 
-    private static void checkAndPrintResults(Automaton automaton1, Automaton automaton2, Automaton minimizedResult, Map<String, Integer> xyCombinations) {
-        int m = automaton1.getTotalStates();
-        int k = automaton1.getEndStates().size();
-        int n = automaton2.getTotalStates();
-        int l = automaton2.getEndStates().size();
-
-        // Conditions for special notification
-        if (minimizedResult.getTotalStates() > (m * n) / 2 && minimizedResult.getEndStates().size() > (m * n) / 4) {
-            specialCaseFound = true;
-            System.out.println("Found special case automaton with conditions met for concatenation of:");
-            System.out.println("First Automaton: " + automaton1.getCurrentAutomata() + " (States: " + m + ", End States: " + k + ")");
-            System.out.println("Second Automaton: " + automaton2.getCurrentAutomata() + " (States: " + n + ", End States: " + l + ")");
-            System.out.println("Resulting Automaton after Minimization: " + minimizedResult.getCurrentAutomata());
-            System.out.println("Total States: " + minimizedResult.getTotalStates() + ", End States: " + minimizedResult.getEndStates().size());
-            System.out.println("Resulting Automaton Details: ");
-            System.out.println(minimizedResult);
-        }
-
-        // Print details or store information as needed
-        updateXYCombinations(minimizedResult, xyCombinations);
-    }
-
+    // Updates the map of XY combinations with the total and end states of a minimized automaton result
     private static void updateXYCombinations(Automaton minimizedResult, Map<String, Integer> xyCombinations) {
         String xyKey = minimizedResult.getTotalStates() + "," + minimizedResult.getEndStates().size();
-        xyCombinations.merge(xyKey, 1, Integer::sum);
+        xyCombinations.merge(xyKey, 1, Integer::sum); // Merge updates the value by summing if the key already exists
     }
 
+    // Prints out the XY combinations and their occurrences
     private static void printXYCombinations(Map<String, Integer> xyCombinations) {
         System.out.println("X,Y Combinations (Total States, End States) and their occurrences after minimization:");
-        // Convert the map into a stream, sort it by the total number of states in descending order, and then collect the results
         xyCombinations.entrySet().stream()
             .sorted((entry1, entry2) -> Integer.compare(
-                Integer.parseInt(entry2.getKey().split(",")[0]), // Parse X from the second entry
-                Integer.parseInt(entry1.getKey().split(",")[0])  // Parse X from the first entry
+                Integer.parseInt(entry2.getKey().split(",")[0]), // Sort by total number of states in descending order
+                Integer.parseInt(entry1.getKey().split(",")[0])
             ))
             .forEach(entry -> System.out.println("[" + entry.getKey() + "] -> " + entry.getValue()));
     }
-    private static void batchProcessedMessage() {
-        String message = "Processed a batch of 1000. Continuing";
-        for (int i = 0; i < counter % 3 + 1; i++) {
-            message += ".";
-        }
-        System.out.println(message);
-        counter++;
-    }
-    
 }
