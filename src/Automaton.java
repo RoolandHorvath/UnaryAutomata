@@ -39,7 +39,7 @@ class Automaton {
 
     // Checks if at least half of the states are accepting states
     public boolean hasHalfEndStates() {
-        return endStates.size() * 2 >= totalStates;
+        return endStates.size() * 2 == totalStates;
     }
 
     // Returns the total number of states in the automaton
