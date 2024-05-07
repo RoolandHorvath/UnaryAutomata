@@ -30,7 +30,7 @@ public class AutomatonOperations {
                                                                                                             // square
         }
 
-        // In the square operation, after copying transitions
+        // after copying transitions
         for (int endState : originalAutomaton.getEndStates()) {
 
             squaredAutomaton.addEpsilonTransition(endState, originalTotalStates); // Directly to the start of the
@@ -52,7 +52,7 @@ public class AutomatonOperations {
 
         // Epsilon transitions from every accepting state back to the new start state
         automaton.getEndStates().forEach(endState -> {
-            if (endState != newStartState) { // Avoid loop on the new start state itself
+            if (endState != newStartState) {
                 newAutomaton.addEpsilonTransition(endState, newStartState);
             }
         });
@@ -67,14 +67,14 @@ public class AutomatonOperations {
 
         // Copy transitions from the first automaton
         for (int i = 0; i < firstAutomaton.getTotalStates(); i++) {
-            final int currentState = i; // Final variable for lambda expression
+            final int currentState = i;
             firstAutomaton.getTransitions().getOrDefault(i, new HashSet<>())
                     .forEach(toState -> concatenatedAutomaton.addTransition(currentState, toState));
         }
 
         // Copy transitions from the second automaton, adjusting their states
         for (int i = 0; i < secondAutomaton.getTotalStates(); i++) {
-            final int offsetState = i + firstAutomaton.getTotalStates(); // Adjusted state index
+            final int offsetState = i + firstAutomaton.getTotalStates();
             secondAutomaton.getTransitions().getOrDefault(i, new HashSet<>()).forEach(toState -> concatenatedAutomaton
                     .addTransition(offsetState, toState + firstAutomaton.getTotalStates()));
         }
@@ -85,7 +85,7 @@ public class AutomatonOperations {
                 endState -> concatenatedAutomaton.addEpsilonTransition(endState, firstAutomaton.getTotalStates()));
 
         // Set the end states of the concatenated automaton to those of the second
-        // automaton, adjusted
+        // automaton
         secondAutomaton.getEndStates()
                 .forEach(endState -> concatenatedAutomaton.addEndState(endState + firstAutomaton.getTotalStates()));
 
@@ -103,7 +103,7 @@ public class AutomatonOperations {
         Automaton dfa = new Automaton(0, nfa.getCurrentAutomata() + "_DFA");
         // A list to manage sets of NFA states that need to be processed
         List<Set<Integer>> statesToProcess = new LinkedList<>();
-        // Counter for DFA states; it's used to assign unique IDs to new DFA states
+        // Counter for DFA states
         int dfaStateCounter = 0;
 
         // Reset startStateId to -1 for a new conversion process
@@ -118,14 +118,14 @@ public class AutomatonOperations {
         // Explicitly setting the start state ID of the DFA to 0
         startStateId = 0;
 
-        //System.out.println("Initial DFA state (start state closure): " + startStateClosure + " as state 0");
+        // System.out.println("Initial DFA state (start state closure): " + startStateClosure + " as state 0");
         // If the start state closure includes any of NFA's end states, mark the
         // corresponding DFA state as an end state
         if (startStateClosure.stream().anyMatch(nfa.getEndStates()::contains)) {
             dfa.addEndState(startStateId);
-            //System.out.println("Adding start state as end state: " + startStateId);
+            // System.out.println("Adding start state as end state: " + startStateId);
         }
-        //System.out.println("Starting NFA to DFA conversion...");
+        // System.out.println("Starting NFA to DFA conversion...");
 
         // Process each set of NFA states until there are no more states to process
         while (!statesToProcess.isEmpty()) {
@@ -142,17 +142,16 @@ public class AutomatonOperations {
                 }
             }
 
-            // If this new set of states doesn't already have a corresponding DFA state,
-            // create one
+            // If this new set of states doesn't already have a corresponding DFA state, create one
             if (!stateMapping.containsKey(newState)) {
                 stateMapping.put(newState, dfaStateCounter);
                 statesToProcess.add(newState);
-                //System.out.println("Adding new DFA state: " + newState + " as state " + dfaStateCounter);
+                // System.out.println("Adding new DFA state: " + newState + " as state " + dfaStateCounter);
                 // Check if the new set of states includes any end states and mark the DFA state
                 // accordingly
                 if (newState.stream().anyMatch(nfa.getEndStates()::contains)) {
                     dfa.addEndState(dfaStateCounter);
-                    //System.out.println("Adding end state: " + dfaStateCounter);
+                    // System.out.println("Adding end state: " + dfaStateCounter);
                 }
                 dfaStateCounter++;
             }
@@ -161,17 +160,17 @@ public class AutomatonOperations {
             // corresponding to the new set of states
             int newStateDFAId = stateMapping.get(newState);
             dfa.addTransition(currentDFAState, newStateDFAId);
-            //System.out.println("Adding transition from DFA state " + currentDFAState + " to DFA state " + newStateDFAId);
+            // System.out.println("Adding transition from DFA state " + currentDFAState + " to DFA state " + newStateDFAId);
         }
 
         // After processing all states, set the total number of states in the DFA
         dfa.setTotalStates(dfaStateCounter);
-        //System.out.println("DFA conversion complete. Total states: " + dfaStateCounter);
+        // System.out.println("DFA conversion complete. Total states: " + dfaStateCounter);
         return dfa;
     }
 
     public static Automaton minimizeDFA(Automaton dfa) {
-        //System.out.println("Starting DFA minimization...");
+        // System.out.println("Starting DFA minimization");
         // Identify the accepting (end) states of the DFA
         Set<Integer> acceptingStates = dfa.getEndStates();
         // A set to store non-accepting states, initially empty
@@ -187,7 +186,7 @@ public class AutomatonOperations {
         partitions.add(acceptingStates);
         if (!nonAcceptingStates.isEmpty())
             partitions.add(nonAcceptingStates);
-        //System.out.println("Initial partitions: Accepting=" + acceptingStates + ", Non-accepting=" + nonAcceptingStates);
+        // System.out.println("Initial partitions: Accepting=" + acceptingStates + ", Non-accepting=" + nonAcceptingStates);
 
         // Boolean to keep track of whether the partitions changed in the last iteration
         boolean changed;
@@ -196,9 +195,9 @@ public class AutomatonOperations {
             List<Set<Integer>> newPartitions = new ArrayList<>();
             // Evaluate each current partition for possible splitting
             for (Set<Integer> partition : partitions) {
-                //System.out.println("Evaluating partition: " + partition);
+                // System.out.println("Evaluating partition: " + partition);
                 List<Set<Integer>> splitResults = splitPartition(partition, dfa, partitions);
-                //System.out.println("Split results: " + splitResults);
+                // System.out.println("Split results: " + splitResults);
                 // If a partition was split, set changed to true
                 if (splitResults.size() > 1)
                     changed = true;
@@ -207,7 +206,7 @@ public class AutomatonOperations {
             // Update partitions for the next iteration
             partitions = new ArrayList<>(newPartitions);
         } while (changed); // Continue while changes are happening
-        //System.out.println("Minimization complete. Final partitions: " + partitions);
+        // System.out.println("Minimization complete. Final partitions: " + partitions);
 
         // After finalizing partitions, construct the minimized DFA
         Automaton minimizedDFA = new Automaton(0, dfa.getCurrentAutomata() + "_minimized");
@@ -248,7 +247,7 @@ public class AutomatonOperations {
         }
 
         minimizedDFA.setTotalStates(newStateID);
-        //System.out.println("Minimization complete. Total states: " + newStateID);
+        // System.out.println("Minimization complete. Total states: " + newStateID);
         return minimizedDFA;
     }
 

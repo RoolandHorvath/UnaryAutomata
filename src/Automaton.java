@@ -38,8 +38,14 @@ class Automaton {
     }
 
     // Checks if at least half of the states are accepting states
-    public boolean hasHalfEndStates() {
-        return endStates.size() * 2 == totalStates;
+    public boolean hasUpToHalfEndStates() {
+        int halfEndStates = totalStates / 2;
+    
+        if (totalStates % 2 == 1) {
+            return endStates.size() == halfEndStates;
+        } else {
+            return endStates.size() == halfEndStates;
+        }
     }
 
     // Returns the total number of states in the automaton
@@ -47,7 +53,7 @@ class Automaton {
         return totalStates;
     }
 
-    // Creates a deep copy of the current automaton
+    // Creates a copy of the current automaton
     public Automaton cloneAutomaton() {
         Automaton cloned = new Automaton(this.totalStates, this.currentAutomata);
         for (Map.Entry<Integer, Set<Integer>> entry : this.transitions.entrySet()) {
@@ -98,6 +104,15 @@ class Automaton {
         }
         sb.append("End states: ").append(endStates).append("\n");
         return sb.toString();
+    }
+    public String toCompactString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Automaton ID: ").append(currentAutomata).append(" | Transitions: ");
+        transitions.forEach((from, toSet) -> {
+            sb.append(from).append("->").append(toSet).append(" ");
+        });
+        sb.append("| End States: ").append(endStates);
+        return sb.toString().trim();
     }
 
     // Retrieves the identifier of the current automaton
