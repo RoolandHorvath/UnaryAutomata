@@ -1,6 +1,6 @@
-// Original code for concatenation and star operations by PeterDomC on GitHub:
+// Inspiration for concatenation and plus operations taken from PeterDomC on GitHub:
 // https://github.com/PeterDomC/Lifa/blob/main/src/automataAlgorithms/Operations.java
-// Original code for NFA to DFA conversion and DFA minimization from the dk.brics.automaton library:
+// Inspiration for NFA to DFA conversion and DFA minimization taken from the dk.brics.automaton library:
 // https://github.com/cs-au-dk/dk.brics.automaton
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class AutomatonOperations {
         return squaredAutomaton;
     }
 
-    public static Automaton star(Automaton automaton) {
+    public static Automaton plus(Automaton automaton) {
         Automaton newAutomaton = automaton.cloneAutomaton();
         int newStartState = newAutomaton.getTotalStates(); // New state becomes the new start state
         newAutomaton.incrementTotalStates();

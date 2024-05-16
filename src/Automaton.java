@@ -4,8 +4,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-// Definition of the Automaton class representing a finite automaton, 
-// including deterministic (DFA) and nondeterministic (NFA) automata
 class Automaton {
     // Maps each state to a set of states it can transition to, for regular transitions
     private HashMap<Integer, Set<Integer>> transitions;
